@@ -1,6 +1,8 @@
 <template>
     <div class="wrapper">
+      <!-- 顶部 -->
         <v-head></v-head>
+        <!-- 侧边栏 -->
         <v-sidebar></v-sidebar>
         <div class="content-box" :class="{'content-collapse':collapse}">
             <!-- <v-tags></v-tags> -->

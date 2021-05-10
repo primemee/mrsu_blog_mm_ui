@@ -65,6 +65,7 @@ import 'quill/dist/quill.core.css';
 import 'quill/dist/quill.snow.css';
 import 'quill/dist/quill.bubble.css';
 import { quillEditor } from 'vue-quill-editor';
+//富文本编辑器基本配置
 const toolbarOptions = [
     ['bold', 'italic', 'underline', 'strike'], // toggled buttons
     ['blockquote', 'code-block'],
@@ -84,6 +85,7 @@ const toolbarOptions = [
 export default {
     data() {
         return {
+            //标签数组
             classifyList: [
                 'Git',
                 'svn',
@@ -92,6 +94,7 @@ export default {
                 'css',
                 'vue',
                 'html',
+                'echarts',
                 'java',
                 'html5',
                 'element-ui',
@@ -143,11 +146,13 @@ export default {
                 'sqlite',
                 'postgresql'
             ],
+            //文章表单
             form: {
                 title: '',
                 classify: [],
                 type: '0'
             },
+            //文章表单验证规则
             formRules: {
                 title: [{ required: true, message: '请输入文章标题', trigger: 'blur' }]
             },
@@ -161,6 +166,7 @@ export default {
                         handlers: {
                             image: function(value) {
                                 if (value) {
+                                    //触发el-upload自带的上传组件
                                     document.querySelector('.el-upload input').click();
                                 } else {
                                     this.quill.format('image', false);
@@ -171,14 +177,18 @@ export default {
                 },
                 placeholder: 'Hello World'
             },
+            //是否展示输入框
             inputVisible: false,
+            //输入值
             inputValue: '',
+            //选择框值
             value: '',
+            //标签
             classify: '',
+            //文章内容
             content: '',
             html: '',
-            configs: {},
-            editArticleId: 0,
+            //上传图片后端地址
             imageUrl: 'http://localhost:8081/article/v1/upload'
         };
     },
@@ -186,14 +196,17 @@ export default {
         quillEditor
     },
     methods: {
+        //选择框改变时
         selectChange(value) {
             if (!this.form.classify.includes(value)) {
                 this.form.classify.push(value);
             }
         },
+        //tag标签关闭时
         handleClose(tag) {
             this.form.classify.splice(this.form.classify.indexOf(tag), 1);
         },
+        //图片上传成功时
         handleSuccess(res) {
             // 获取富文本组件实例
             let quill = this.$refs.myTextEditor.quill;
@@ -209,6 +222,7 @@ export default {
                 this.$message.error('图片插入失败');
             }
         },
+        //文章提交
         submit() {
             this.$refs.form.validate(async valid => {
                 if (!valid) return;
@@ -220,6 +234,7 @@ export default {
                 });
                 if (res.error_code === 10000) {
                     this.$message.success('发布文章成功！');
+                    //清空表单
                     this.$refs.form.resetFields();
                     this.form.classify = [];
                     this.content = '';
@@ -227,18 +242,21 @@ export default {
                 }
             });
         },
+        //重置操作
         clear() {
             this.$refs.form.resetFields();
             this.form.classify = [];
             this.content = '';
             this.value = '';
         },
+        //展示tag输入框
         showInput() {
             this.inputVisible = true;
             this.$nextTick(_ => {
                 this.$refs.saveTagInput.$refs.input.focus();
             });
         },
+        //确认自定义tag
         handleInputConfirm() {
             let inputValue = this.inputValue;
             if (inputValue && !this.form.classify.includes(inputValue)) {
@@ -247,11 +265,7 @@ export default {
             this.inputVisible = false;
             this.inputValue = '';
         },
-        onEditorChange({ editor, html, text }) {
-            this.content = html;
-        }
     },
-    computed: {},
 };
 </script>
 

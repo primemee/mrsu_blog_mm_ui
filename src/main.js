@@ -5,16 +5,15 @@ import ElementUI from 'element-ui';
 import VueI18n from 'vue-i18n';
 import { messages } from './components/common/i18n';
 import 'element-ui/lib/theme-chalk/index.css'; // 默认主题
-// import './assets/css/theme-green/index.css'; // 浅绿色主题
 import './assets/css/icon.css';
-// import './components/common/directives';
 import 'babel-polyfill';
 import axios from 'axios';
 //导入nprogress包对应的js和css
 import NProgress from 'nprogress';
+//引入leancloud
 import AV from 'leancloud-storage';
 
-axios.defaults.baseURL = 'http://localhost:8081';
+axios.defaults.baseURL = 'http://120.79.14.216:8081';
 Vue.config.productionTip = false;
 Vue.prototype.$axios = axios;
 Vue.use(VueI18n);
@@ -25,14 +24,14 @@ const i18n = new VueI18n({
     locale: 'zh',
     messages
 });
-
+//leancloud配置
 const appId = 'b0ldHK3FgjGVVjSKHelxO3Ux-gzGzoHsz';
 const appKey = '9BzkUEUXyIiNnflLJqhprwTA';
 AV.init({
     appId, appKey,serverURL: "https://b0ldhk3f.lc-cn-n1-shared.com"
 });
 
-//使用钩子函数对路由进行权限跳转
+//路由导航前置守卫
 router.beforeEach((to, from, next) => {
     NProgress.start();
     // if (to.path === '/login') {

@@ -5,23 +5,14 @@
             <i v-if="!collapse" class="el-icon-s-fold"></i>
             <i v-else class="el-icon-s-unfold"></i>
         </div>
-        <div class="logo">{{baseForm.nickname}}个人博客后台管理系统</div>
+        <div class="logo">{{ baseForm.nickname }}个人博客后台管理系统</div>
         <div class="header-right">
             <div class="header-user-con">
                 <!-- 全屏显示 -->
-                <div class="btn-fullscreen" @click="handleFullScreen">
+                <!-- <div class="btn-fullscreen" @click="handleFullScreen">
                     <el-tooltip effect="dark" :content="fullscreen ? `取消全屏` : `全屏`" placement="bottom">
                         <i class="el-icon-rank"></i>
                     </el-tooltip>
-                </div>
-                <!-- 消息中心 -->
-                <!-- <div class="btn-bell">
-                    <el-tooltip effect="dark" :content="message ? `有${message}条未读消息` : `消息中心`" placement="bottom">
-                        <router-link to="/tabs">
-                            <i class="el-icon-bell"></i>
-                        </router-link>
-                    </el-tooltip>
-                    <span class="btn-bell-badge" v-if="message"></span>
                 </div> -->
                 <!-- 用户头像 -->
                 <div class="user-avator">
@@ -34,7 +25,7 @@
                         <i class="el-icon-caret-bottom"></i>
                     </span>
                     <el-dropdown-menu slot="dropdown">
-                        <a href="https://github.com/lin-xin/vue-manage-system" target="_blank">
+                        <a href="https://github.com/primemee/mrsu_blog_mm_ui" target="_blank">
                             <el-dropdown-item>项目仓库</el-dropdown-item>
                         </a>
                         <el-dropdown-item divided command="editPassword">修改密码</el-dropdown-item>
@@ -45,7 +36,7 @@
         </div>
         <el-dialog title="修改密码" :visible.sync="editPwdVisible" width="30%" :close-on-click-modal="false" :before-close="editCancel">
             <el-form :model="pwdForm" ref="pwdFormRef" :rules="pwdFormRules" label-width="100px">
-                <el-form-item label="用户名" >
+                <el-form-item label="用户名">
                     <el-input v-model="baseForm.name" disabled></el-input>
                 </el-form-item>
                 <el-form-item label="原密码" prop="oldPwd">
@@ -71,7 +62,7 @@ import { updateUserInfo, getUserInfoById } from '@/api/index';
 import md5 from 'js-md5';
 export default {
     data() {
-        /*****检验两次密码是否一致***/
+        //检验新密码与原密码是否一致
         var validatePass = (rule, value, callback) => {
             if (value === this.pwdForm.oldPwd) {
                 callback(new Error('新密码不能与原密码相同'));
@@ -82,6 +73,7 @@ export default {
                 callback();
             }
         };
+        //检验新密码与确认密码是否一致
         var validatePass2 = (rule, value, callback) => {
             if (value === '') {
                 callback(new Error('请再次输入密码'));
@@ -92,12 +84,17 @@ export default {
             }
         };
         return {
+            //侧边是否折叠
             collapse: false,
+            //是否全屏
             fullscreen: false,
-            message: 2,
+            //是否是否修改密码框
             editPwdVisible: false,
+            //密码表单
             pwdForm: {},
+            //基本信息表单
             baseForm: {},
+            //密码表单规则
             pwdFormRules: {
                 oldPwd: [
                     {
@@ -127,6 +124,7 @@ export default {
         this.getUserInfo();
     },
     methods: {
+      //获取用户数据
         async getUserInfo() {
             const { data: res } = await getUserInfoById(2);
             this.baseForm = res.result_data;
@@ -157,10 +155,12 @@ export default {
                 this.editPwdVisible = true;
             }
         },
+        //取消修改密码
         editCancel() {
             this.editPwdVisible = false;
             this.$refs.pwdFormRef.resetFields();
         },
+        //修改密码提交
         editSubmit() {
             this.$refs.pwdFormRef.validate(async valid => {
                 if (!valid) return;
@@ -171,12 +171,12 @@ export default {
                         name: this.baseForm.name,
                         user_ticket: user_ticket
                     });
-                    if(res.error_code === 10000){
-                        this.editPwdVisible = false
-                        this.$message.success('密码修改成功,请重新登录！')
+                    if (res.error_code === 10000) {
+                        this.editPwdVisible = false;
+                        this.$message.success('密码修改成功,请重新登录！');
                         sessionStorage.removeItem('ms_username');
                         this.$router.push('/login');
-                    };
+                    }
                 }
             });
         },

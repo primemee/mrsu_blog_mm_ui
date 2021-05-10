@@ -2,7 +2,7 @@
     <div class="aricleList">
         <div class="crumbs">
             <el-breadcrumb separator="/">
-                <el-breadcrumb-item> <i class="el-icon-lx-cascades"></i> 基础表格 </el-breadcrumb-item>
+                <el-breadcrumb-item> <i class="el-icon-lx-cascades"></i> 文章管理 </el-breadcrumb-item>
             </el-breadcrumb>
         </div>
         <div class="container">
@@ -157,6 +157,7 @@
                     </el-select>
                     <el-input
                         class="input-new-tag"
+                        style="width:22.5%;marginLeft:10px"
                         v-if="inputVisible"
                         v-model="inputValue"
                         ref="saveTagInput"
@@ -165,7 +166,7 @@
                         @blur="handleInputConfirm"
                     >
                     </el-input>
-                    <el-button v-else class="button-new-tag" size="small" @click="showInput">+ New Tag</el-button>
+                    <el-button v-else class="button-new-tag" style="marginLeft:10px" size="small" @click="showInput">+ New Tag</el-button>
                 </el-form-item>
                 <el-divider></el-divider>
                 <el-upload
@@ -199,6 +200,7 @@ import 'quill/dist/quill.core.css';
 import 'quill/dist/quill.snow.css';
 import 'quill/dist/quill.bubble.css';
 import { quillEditor } from 'vue-quill-editor';
+//富文本编辑器基本配置
 const toolbarOptions = [
     ['bold', 'italic', 'underline', 'strike'], // toggled buttons
     ['blockquote', 'code-block'],
@@ -213,22 +215,25 @@ const toolbarOptions = [
     [{ color: [] }, { background: [] }], // dropdown with defaults from theme
     [{ font: [] }],
     [{ align: [] }],
-    ['link', 'image', 'video'],
-    ['clean'] // remove formatting button
+    ['link', 'image'],
 ];
 export default {
     data() {
         return {
-            tableData: [],
+            //编辑对话框是否展示
             editVisible: false,
+            //详情对话框是否展示
             detailVisible: false,
+            //表格高度
             tableHeight: 50,
+            //搜索表单
             searchForm: {
                 id: '',
                 title: '',
                 start_date: '',
                 end_date: ''
             },
+            //标签数组
             classifyList: [
                 'Git',
                 'svn',
@@ -237,6 +242,7 @@ export default {
                 'css',
                 'vue',
                 'html',
+                'echarts',
                 'java',
                 'html5',
                 'python',
@@ -288,7 +294,9 @@ export default {
                 'sqlite',
                 'postgresql'
             ],
+            //编辑文章内容
             editContent: '',
+            //上传图片后端地址
             imageUrl: 'http://localhost:8081/article/v1/upload',
             //富文本编辑器配置
             editorOption: {
@@ -298,6 +306,7 @@ export default {
                         handlers: {
                             image: function(value) {
                                 if (value) {
+                                    //触发el-upload自带的上传组件
                                     document.querySelector('.el-upload input').click();
                                 } else {
                                     this.quill.format('image', false);
@@ -308,24 +317,37 @@ export default {
                 },
                 placeholder: 'Hello World'
             },
+            //编辑表单对象
             editForm: {
                 title: '',
                 classify: [],
                 type: '0'
             },
+            //编辑表单规则
             editFormRules: {
                 title: [{ required: true, message: '请输入文章标题', trigger: 'blur' }]
             },
+            //博客列表数组
             blogBaseList: [],
+            //发布时间搜索数组
             accDate: [],
+            //是否展示输入框
             inputVisible: false,
+            //输入值
             inputValue: '',
+            //选择框值
             value: '',
+            //当前页数
             currentPage: 1,
+            //页码数
             PageSize: 10,
+            //页数
             row_start_number: 0,
+            //文章数量
             articleNum: 0,
+            //详情表单对象
             detailForm: {},
+            //发布时间搜搜索配置
             pickerOptions: {
                 shortcuts: [
                     {
@@ -357,7 +379,7 @@ export default {
                     }
                 ]
             },
-            sum: 0,
+            //是否显示加载
             showLoading: true
         };
     },
@@ -378,6 +400,7 @@ export default {
         quillEditor
     },
     methods: {
+        //请求博客列表数据
         async getArticleList() {
             const { data: res } = await getArticleList({
                 row_count: this.PageSize,
@@ -393,6 +416,7 @@ export default {
             // });
             // console.log(that.sum);
         },
+        //根据博客id获取详情
         async getArticledetail(id) {
             const { data: res } = await getArticleListById(id);
             if (res.error_code === 10000) {
@@ -482,9 +506,11 @@ export default {
                 this.$message.error('图片插入失败');
             }
         },
+        //关闭tag
         handleClose(tag) {
             this.editForm.classify.splice(this.editForm.classify.indexOf(tag), 1);
         },
+        //改变文章展示状态
         async statusChange(row) {
             let setStatus = 0;
             if (row.status === 0) {
@@ -534,11 +560,9 @@ export default {
             this.row_start_number = (value - 1) * this.PageSize;
             this.getArticleList();
         },
-        formatter(row, column) {
-            return row.address;
-        }
     },
     filters: {
+        //过滤日期
         formatDate: function(value) {
             let date = new Date(value);
             let y = date.getFullYear();
@@ -554,6 +578,7 @@ export default {
             s = s < 10 ? '0' + s : s;
             return y + '-' + MM + '-' + d + ' ' + h + ':' + m + ':' + s;
         },
+        //过滤最近时间
         diffTime: function(item) {
             var nowTime = new Date().getTime();
             var minuteTime = 60 * 1000;
@@ -561,7 +586,6 @@ export default {
             var dayTime = 24 * hourTime;
             var monthTime = dayTime * 30;
             var yearTime = monthTime * 12;
-
             var publishTime = new Date(item).getTime();
             var historyTime = parseInt(nowTime) - parseInt(publishTime);
             var descTime;
@@ -614,6 +638,7 @@ export default {
     width: 300px;
     display: inline-block;
 }
+
 .table {
     width: 100%;
     font-size: 14px;

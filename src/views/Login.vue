@@ -22,10 +22,12 @@ import md5 from 'js-md5';
 export default {
     data() {
         return {
+            //用户表单对象
             userForm: {
                 userName: '',
                 userPwd: ''
             },
+            //用户表单验证规则
             userFormRules: {
                 userName: [
                     { required: true, message: '请输入账号', trigger: 'blur' },
@@ -39,6 +41,7 @@ export default {
         };
     },
     methods: {
+        //登录提交
         toLogin() {
             this.$refs.userFormRef.validate(async valid => {
                 if (!valid) return;

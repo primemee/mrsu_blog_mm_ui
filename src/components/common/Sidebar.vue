@@ -71,11 +71,6 @@ export default {
                     index: 'aricleAdd',
                     title: '新增文章'
                 },
-                // {
-                //     icon: 'el-icon-lx-file',
-                //     index: 'fileMm',
-                //     title: '文件管理'
-                // },
                 {
                     icon: 'el-icon-message',
                     index: 'messageBoardMm',

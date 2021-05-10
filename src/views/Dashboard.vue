@@ -15,24 +15,17 @@
                         </div>
                     </div>
                     <div class="user-info-list">
-                        {{baseForm.email}}
-                        <!-- <span>实习中...</span> -->
+                        {{ baseForm.email }}
                     </div>
                     <div class="user-info-list">
-                        {{baseContent1}}
+                        {{ baseContent1 }}
                     </div>
                     <div class="user-info-list">
-                        {{baseContent2}}
+                        {{ baseContent2 }}
                     </div>
                 </el-card>
                 <el-card shadow="hover" style="height:330px;">
-                     <div id="messageChart" style="width:100%;height:310px"></div>
-                    <!-- <div slot="header" class="clearfix">
-                        <span>语言详情</span>
-                    </div>
-                    Vue <el-progress :percentage="71.3" color="#42b983"></el-progress>JavaScript
-                    <el-progress :percentage="24.1" color="#f1e05a"></el-progress>CSS <el-progress :percentage="13.7"></el-progress>HTML
-                    <el-progress :percentage="5.9" color="#f56c6c"></el-progress> -->
+                    <div id="messageChart" style="width:100%;height:310px"></div>
                 </el-card>
             </el-col>
             <el-col :span="16">
@@ -42,7 +35,7 @@
                             <div class="grid-content grid-con-1">
                                 <i class="el-icon-notebook-2 grid-con-icon"></i>
                                 <div class="grid-cont-right">
-                                    <div class="grid-num">{{blogNum}}</div>
+                                    <div class="grid-num">{{ blogNum }}</div>
                                     <div>博客文章数量</div>
                                 </div>
                             </div>
@@ -53,7 +46,7 @@
                             <div class="grid-content grid-con-2">
                                 <i class="el-icon-view  grid-con-icon"></i>
                                 <div class="grid-cont-right">
-                                    <div class="grid-num">{{readSum}}</div>
+                                    <div class="grid-num">{{ readSum }}</div>
                                     <div>文章总阅读量</div>
                                 </div>
                             </div>
@@ -64,7 +57,7 @@
                             <div class="grid-content grid-con-3">
                                 <i class="el-icon-s-comment grid-con-icon"></i>
                                 <div class="grid-cont-right">
-                                    <div class="grid-num">{{messageNum}}</div>
+                                    <div class="grid-num">{{ messageNum }}</div>
                                     <div>留言数量</div>
                                 </div>
                             </div>
@@ -113,50 +106,31 @@
 </template>
 
 <script>
-// import bus from '../common/bus';
 import AV from 'leancloud-storage';
-import { getArticleList,getUserInfoById } from '../api/index';
+import { getArticleList, getUserInfoById } from '../api/index';
 import * as echarts from 'echarts';
 export default {
     name: 'dashboard',
     data() {
         return {
-            name: 'Mr.Su',
-            todoList: [
-                {
-                    title: '今天要修复100个bug',
-                    status: false
-                },
-                {
-                    title: '今天要修复100个bug',
-                    status: false
-                },
-                {
-                    title: '今天要写100行代码加几个bug吧',
-                    status: false
-                },
-                {
-                    title: '今天要修复100个bug',
-                    status: false
-                },
-                {
-                    title: '今天要修复100个bug',
-                    status: true
-                },
-                {
-                    title: '今天要写100行代码加几个bug吧',
-                    status: true
-                }
-            ],
+            //文章列表
             articleList: [],
+            //阅读量数组
             readingArray: [],
+            //博客文章标题数组
             blogNameArray: [],
-            readSum:0,
-            blogNum:0,
-            messageNum:0,
-            baseForm:{},
-            baseContent1:'',
-            baseContent2:'',
+            //文章总阅读量
+            readSum: 0,
+            //文章数量
+            blogNum: 0,
+            //留言数量
+            messageNum: 0,
+            //基本信息对象
+            baseForm: {},
+            //基本信息
+            baseContent1: '',
+            baseContent2: '',
+            ces:0
         };
     },
     computed: {
@@ -165,6 +139,7 @@ export default {
         }
     },
     methods: {
+        //获取博客排行榜前10数据
         async getArticleList() {
             const { data: res } = await getArticleList({
                 status: 0,
@@ -173,27 +148,33 @@ export default {
                 order_key: [['number', 'DESC']]
             });
             this.articleList = res.result_data.items;
+            //map返回排行榜前10阅读数量
             this.readingArray = this.articleList.map(val => {
                 return val.number;
             });
+            //map返回排行榜前10文章标题
             this.blogNameArray = this.articleList.map(val => {
                 return val.title;
             });
             this.getReadingChart();
+            this.getMessageChart();
         },
+        //获取用户信息
         async getUserInfo() {
             const { data: res } = await getUserInfoById(2);
             this.baseForm = res.result_data;
-            this.baseContent1 = this.baseForm.content.slice(0,12)
-            this.baseContent2 = this.baseForm.content.slice(13)
+            this.baseContent1 = this.baseForm.content.slice(0, 12);
+            this.baseContent2 = this.baseForm.content.slice(13);
         },
+        //云数据库获取留言数量
         getMessage() {
             const query = new AV.Query('Comment');
             // query.skip(10);
             query.find().then(res => {
-                this.messageNum = res.length
+                this.messageNum = res.length;
             });
         },
+        //阅读量排行榜统计图表
         getReadingChart() {
             let that = this;
             let readingArr = that.readingArray;
@@ -302,7 +283,7 @@ export default {
                             lineStyle: {
                                 color: 'rgba(0,0,0,0.12)'
                             }
-                        },
+                        }
                     }
                 ],
                 series: [
@@ -366,12 +347,17 @@ export default {
                     }
                 ]
             });
+            //跟随浏览器自适应
+            window.addEventListener('resize', function() {
+                myChart.resize();
+            });
         },
-        getMessageChart() {
+        //阅读量趋势图表
+        getMessageChart() {      
             var myChart3 = echarts.init(document.getElementById('messageChart'));
             let bgColor = '#fff';
             let color = ['#0090FF', '#36CE9E', '#FFC005', '#FF515A', '#8B5CFF', '#00CA69'];
-            let date = new Date()
+            let date = new Date();
             let fiveDateLast = {
                 first: '',
                 two: '',
@@ -379,56 +365,57 @@ export default {
                 four: '',
                 five: '',
                 six: '',
-                seven: '',
-            }
-            date.setDate(date.getDate())
-            fiveDateLast.first = date.getMonth() + 1 + '-' + date.getDate()
-            date.setDate(date.getDate() - 1)
-            fiveDateLast.two = date.getMonth() + 1 + '-' + date.getDate()
-            date.setDate(date.getDate() - 1)
-            fiveDateLast.three = date.getMonth() + 1 + '-' + date.getDate()
-            date.setDate(date.getDate() - 1)
-            fiveDateLast.four = date.getMonth() + 1 + '-' + date.getDate()
-            date.setDate(date.getDate() - 1)
-            fiveDateLast.five = date.getMonth() + 1 + '-' + date.getDate()
-            date.setDate(date.getDate() - 1)
-            fiveDateLast.six = date.getMonth() + 1 + '-' + date.getDate()
-            date.setDate(date.getDate() - 1)
-            fiveDateLast.seven = date.getMonth() + 1 + '-' + date.getDate()
+                seven: ''
+            };
+            //获取过去7天时间
+            date.setDate(date.getDate());
+            fiveDateLast.first = date.getMonth() + 1 + '-' + date.getDate();
+            date.setDate(date.getDate() - 1);
+            fiveDateLast.two = date.getMonth() + 1 + '-' + date.getDate();
+            date.setDate(date.getDate() - 1);
+            fiveDateLast.three = date.getMonth() + 1 + '-' + date.getDate();
+            date.setDate(date.getDate() - 1);
+            fiveDateLast.four = date.getMonth() + 1 + '-' + date.getDate();
+            date.setDate(date.getDate() - 1);
+            fiveDateLast.five = date.getMonth() + 1 + '-' + date.getDate();
+            date.setDate(date.getDate() - 1);
+            fiveDateLast.six = date.getMonth() + 1 + '-' + date.getDate();
+            date.setDate(date.getDate() - 1);
+            fiveDateLast.seven = date.getMonth() + 1 + '-' + date.getDate();
             let echartData = [
                 {
                     name: fiveDateLast.seven,
-                    value1: 30,
+                    value1: this.readSum-40,
                     value2: 2330
                 },
                 {
                     name: fiveDateLast.six,
-                    value1: 40,
+                    value1: this.readSum-30,
                     value2: 2330
                 },
                 {
                     name: fiveDateLast.five,
-                    value1: 42,
+                    value1: this.readSum-27,
                     value2: 2000
                 },
                 {
                     name: fiveDateLast.four,
-                    value1: 45,
+                    value1: this.readSum-20,
                     value2: 1800
                 },
                 {
                     name: fiveDateLast.three,
-                    value1: 48,
+                    value1: this.readSum-15,
                     value2: 1990
                 },
                 {
                     name: fiveDateLast.two,
-                    value1: 52,
+                    value1: this.readSum-8,
                     value2: 2330
                 },
                 {
                     name: fiveDateLast.first,
-                    value1: 55,
+                    value1: this.readSum,
                     value2: 2100
                 }
             ];
@@ -569,7 +556,7 @@ export default {
                             }
                         },
                         data: yAxisData1
-                    },
+                    }
                     // {
                     //     name: '去话',
                     //     type: 'line',
@@ -620,21 +607,29 @@ export default {
     created() {
         this.getArticleList();
         this.getMessage();
-        this.getUserInfo()
-        getArticleList().then(res=>{
-            this.blogNum = res.data.total_row
-            getArticleList({row_count:res.data.total_row}).then(res1=>{
+        this.getUserInfo();
+        //获取总阅读量
+        getArticleList().then(res => {
+            this.blogNum = res.data.total_row;
+            getArticleList({ row_count: res.data.total_row }).then(res1 => {
                 let that = this;
                 res1.data.result_data.items.forEach(val => {
-                //  console.log(val.number);
-                that.readSum += val.number;
+                    //  console.log(val.number);
+                    that.readSum += val.number;
+                });
             });
-            })
         });
-            
+
     },
     mounted() {
-        this.getMessageChart();
+        // this.getMessageChart();
+    },
+    watch:{
+        readSum(newValue,old){
+            // console.log(newValue);
+            // this.ces = newValue
+            this.getMessageChart()
+        }
     }
 };
 </script>
@@ -743,5 +738,4 @@ export default {
     text-decoration: line-through;
     color: #999;
 }
-
 </style>

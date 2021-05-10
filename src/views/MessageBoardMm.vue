@@ -8,11 +8,11 @@
 
         <div class="container">
             <div class="handle-box">
-                <el-row justify="start" type="flex">
+                <el-row justify="start" :gutter='15' type="flex">
                     <el-col :span="5">
                         <el-input v-model="messageAuthor" clearable placeholder="请输入留言的作者名称" style="width:100%"></el-input>
                     </el-col>
-                    <el-col :span="1" :offset="1">
+                    <el-col :span="1">
                         <el-button type="primary" @click="handleSearch">搜索</el-button>
                     </el-col>
                 </el-row>
@@ -32,26 +32,26 @@
                 <el-table-column type="index" align="center"></el-table-column>
                 <el-table-column prop="attributes.nick" label="昵称" align="center" show-overflow-tooltip> </el-table-column>
                 <el-table-column prop="attributes.ip" label="ip地址" align="center" show-overflow-tooltip> </el-table-column>
-                <el-table-column  label="邮箱" align="center" show-overflow-tooltip> 
+                <el-table-column label="邮箱" align="center" show-overflow-tooltip>
                     <template slot-scope="scope">
                         <div>
-                            {{scope.row.attributes.mail ==='' ? '无' : scope.row.attributes.mail}}
+                            {{ scope.row.attributes.mail === '' ? '无' : scope.row.attributes.mail }}
                         </div>
                     </template>
                 </el-table-column>
-                <el-table-column label="网址" align="center" show-overflow-tooltip> 
+                <el-table-column label="网址" align="center" show-overflow-tooltip>
                     <template slot-scope="scope">
                         <div>
-                            {{scope.row.attributes.link ==='' ? '无' : scope.row.attributes.link}}
+                            {{ scope.row.attributes.link === '' ? '无' : scope.row.attributes.link }}
                         </div>
                     </template>
                 </el-table-column>
                 <!-- <el-table-column prop="attributes.url" label="留言地址" align="center" show-overflow-tooltip> </el-table-column> -->
-                <el-table-column  label="留言内容" width="400" align="center" show-overflow-tooltip>
+                <el-table-column label="留言内容" width="400" align="center" show-overflow-tooltip>
                     <template slot-scope="scope">
                         <div v-html="scope.row.attributes.comment"></div>
                     </template>
-                     </el-table-column>
+                </el-table-column>
                 <el-table-column label="留言时间" width="170" align="center" show-overflow-tooltip>
                     <template slot-scope="scope">
                         <span>{{ scope.row.createdAt | formatDate }}</span>
@@ -72,7 +72,7 @@
                     layout="total, prev, pager, next, jumper"
                     :current-page="currentPage"
                     :page-size="PageSize"
-                    :total="articleNum"
+                    :total="messageNum"
                     @current-change="handlePageChange"
                 ></el-pagination>
             </div>
@@ -83,27 +83,37 @@
 <script>
 import AV from 'leancloud-storage';
 export default {
+    inject: ['reload'],
     data() {
         return {
+            //留言列表数组
             messageList: [],
+            //留言作者
             messageAuthor: '',
-            showLoading:true,
+            //是否展示加载
+            showLoading: true,
+            //当前页
             currentPage: 1,
+            //页码数
             PageSize: 10,
-            articleNum:0,
-            tableHeight:50
+            //
+            messageNum: 0,
+            tableHeight: 50
         };
     },
     methods: {
         getMessage() {
+            //查找Comment表
             const query = new AV.Query('Comment');
+            //根据创建时间返回
             query.descending('createdAt');
+            //限制返回10
             query.limit(10);
             // query.skip(10);
             query.find().then(res => {
                 this.messageList = res;
-                this.articleNum = res.length
-                this.showLoading = false
+                this.messageNum = res.length;
+                this.showLoading = false;
                 // this.messageList = this.messageList.reverse()
             });
         },
@@ -117,26 +127,30 @@ export default {
                     const todo = AV.Object.createWithoutData('Comment', row.id);
                     todo.destroy();
                     this.getMessage();
-                    this.$message.success('删除成功');
+                    //重新刷新页面
+                    this.reload();
+                    this.$message.success('删除成功！');
                 })
                 .catch(() => {});
         },
+        //搜索
         handleSearch() {
             const query = new AV.Query('Comment');
             query.startsWith('nick', this.messageAuthor);
             query.find().then(res => {
                 this.messageList = res;
-                console.log(res);
+                // console.log(res);
                 // this.messageList = this.messageList.reverse()
             });
         },
-        handlePageChange(){
+        //分页
+        handlePageChange() {
             this.currentPage = value;
-            // this.row_start_number = (value - 1) * this.PageSize;
             this.getMessage();
         }
     },
     filters: {
+      //日期过滤
         formatDate: function(value) {
             let date = new Date(value);
             let y = date.getFullYear();
@@ -165,7 +179,7 @@ export default {
                 this.tableHeight = window.innerHeight - this.$refs.multipleTable.$el.offsetTop - 170;
             };
         });
-    },
+    }
 };
 </script>
 

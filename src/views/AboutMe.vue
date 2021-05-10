@@ -1,5 +1,6 @@
 <template>
     <div class="aboutMe">
+        <!-- 顶部面包屑 -->
         <div class="crumbs">
             <el-breadcrumb separator="/">
                 <el-breadcrumb-item> <i class="el-icon-lx-people"></i> 关于我 </el-breadcrumb-item>
@@ -38,13 +39,6 @@
                             <el-input disabled style="width:81.5%" type="textarea" :rows="3" v-model="baseForm.content"></el-input>
                         </el-form-item>
                     </el-form>
-                    <!-- <ul class="ulc">
-                        <li>用户名：admin</li>
-                        <li>苏国民/男/汉/1998</li>
-                        <li>本科/软件工程/闽江学院</li>
-                        <li>750499761@qq.com</li>
-                        <li>职业专长：前端开发工程师，Vue/NodeJs/MySql</li>
-                    </ul> -->
                     <el-button class="editBtn" type="primary" @click="isShowEditDialog">编辑基本信息</el-button>
                 </div>
             </el-card>
@@ -134,7 +128,8 @@ import { updateUserInfo, getUserInfoById } from '@/api/index.js';
 export default {
     data() {
         return {
-            editDialogVisible: false,
+            editDialogVisible: false,//编辑对话框是否显示
+            //编辑表单对象
             editForm: {
                 name: '',
                 nickname: '',
@@ -142,7 +137,9 @@ export default {
                 qq: '',
                 content: ''
             },
+            //基本信息对象
             baseForm: {},
+            //编辑表单验证规则
             editFormRules: {
                 name: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
                 nickname: [{ required: true, message: '请输入昵称', trigger: 'blur' }],
@@ -156,6 +153,7 @@ export default {
         this.getUserInfo();
     },
     methods: {
+        //请求个人信息数据
         async getUserInfo() {
             const { data: res } = await getUserInfoById(2);
             this.editForm = res.result_data;
@@ -164,7 +162,6 @@ export default {
         //是否展示编辑对话框
         isShowEditDialog() {
             this.editDialogVisible = true;
-            this.$refs.editFormRef.resetFields()
         },
         //编辑提交
         async editSubmit() {
@@ -181,8 +178,10 @@ export default {
                 
             });
         },
+        //编辑对话框关闭
         editCancel(){
           this.editDialogVisible = false
+          this.$refs.editFormRef.resetFields()
         }
     }
 };
